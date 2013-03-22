@@ -2,7 +2,7 @@
 
 import os
 import sys
-import zipfile
+import tarfile
 from datetime import datetime
 
 import cloudfiles
@@ -29,21 +29,17 @@ class CloudFilesRotate(object):
             self.container = self.connection.create_container(container)
 
     def _compress(self, path, tempdir="/tmp"):
-        def _zipdir(path, zipped):
-            for root, dirs, files in os.walk(path):
-                for file in files:
-                    zipped.write(os.path.join(root, file))
-
         if path == '/':
-            filename = os.path.join(tempdir, 'root.zip')
+            filename = os.path.join(tempdir, 'root.tgz')
         elif path.endswith('/'):
             filename = os.path.join(tempdir, os.path.basename(path[:-1])
-                                             + '.zip')
+                                             + '.tgz')
         else:
-            filename = os.path.join(tempdir, os.path.basename(path) + '.zip')
+            filename = os.path.join(tempdir, os.path.basename(path) + '.tgz')
 
-        zipped = zipfile.ZipFile(filename, 'w')
-        _zipdir(path, zipped)
+        zipped = tarfile.open(filename, 'w:gz')
+        zipped.add(path)
+        zipped.close()
         self.compressed = True
 
         return filename
