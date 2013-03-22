@@ -5,7 +5,7 @@ from setuptools import setup, find_packages
 __author__ = "David Wittman <david@wittman.com>"
 NAME = "cfrotate"
 DESC = "A backup rotator for use with Rackspace Cloud Files"
-VERSION = "0.2"
+VERSION = "0.3"
 REQS = [ 'python-cloudfiles', 'argparse' ]
 
 setup(name = NAME,
