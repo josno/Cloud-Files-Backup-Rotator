@@ -13,8 +13,9 @@ class CloudFilesRotate(object):
     >>> cfr.rotate("/var/www/html", 7)
     >>> (123, 119)
     """
-    def __init__(self, username, apikey, container,auth_url, snet=False):
+    def __init__(self, username, apikey, container,auth_url, snet=False, debug=False):
         self.DATE_FORMAT = "%Y-%m-%dT%H%M"
+        self.debug = debug
         try:
             self.connection = cloudfiles.get_connection(username, 
                                                         apikey,
@@ -37,6 +38,8 @@ class CloudFilesRotate(object):
         else:
             filename = os.path.join(tempdir, os.path.basename(path) + '.tgz')
 
+        if self.debug:
+            print "Creating %s" % filename
         zipped = tarfile.open(filename, 'w:gz')
         zipped.add(path)
         zipped.close()
@@ -64,6 +67,8 @@ class CloudFilesRotate(object):
             else:
                 cloudpath = ''.join([self.now, path])
 
+            if self.debug:
+                print "Uploading %s to %s" % (path, cloudpath)
             obj = self.container.create_object(cloudpath)
             obj.load_from_filename(path)
             upload_count += 1
@@ -79,6 +84,8 @@ class CloudFilesRotate(object):
         for prefix in oldest:
             old_objs = self.container.get_objects(prefix=prefix)
             for old_obj in old_objs:
+                if self.debug:
+                    print "Deleting %s" % old_obj
                 self.container.delete_object(old_obj)
                 delete_count += 1
 
